@@ -1,0 +1,27 @@
+objects=test.o secular.o solve.o getmod.o modrt.o psv.o global_data.o flat.o 
+#CFLAG= -lm -L/lib -L/usr/lib
+compile = f95 -c -O3
+link = f95 -unsharedf95
+secular: $(objects)
+	$(link) -o $@ $+
+#secular:$(objects)
+#	${compile} -O $(CFLAG) -o secular $(objects)
+
+test.o:test.f90 secular.o getmod.o flat.o global_data.mod
+	${compile}  test.f90
+flat.o:flat.f90 global_data.mod
+	${compile}  flat.f90
+getmod.o:getmod.f90 global_data.mod
+	${compile}  getmod.f90
+psv.o:psv.f90 global_data.mod
+	${compile}  psv.f90
+solve.o:global_data.mod
+	${compile}  solve.f90
+modrt.o:modrt.f90 solve.f90 global_data.mod
+	${compile}  modrt.f90
+secular.o:modrt.o psv.o global_data.mod
+	${compile}  secular.f90  psv.f90 modrt.f90
+global_data.mod:global_data.f90
+	${compile}  global_data.f90
+clean:
+	-rm $(objects) global_data.mod
